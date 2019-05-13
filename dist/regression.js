@@ -1,61 +1,35 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['module'], factory);
+    define([], factory);
   } else if (typeof exports !== "undefined") {
-    factory(module);
+    factory();
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod);
+    factory();
     global.regression = mod.exports;
   }
-})(this, function (module) {
-  'use strict';
+})(this, function () {
+  "use strict";
 
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
+  function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
-    return obj;
-  }
+  function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-  var _extends = Object.assign || function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
+  function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
+  function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
 
-    return target;
+  function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+  function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+  var DEFAULT_OPTIONS = {
+    order: 2,
+    precision: 2,
+    period: null
   };
-
-  function _toConsumableArray(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
-        arr2[i] = arr[i];
-      }
-
-      return arr2;
-    } else {
-      return Array.from(arr);
-    }
-  }
-
-  var DEFAULT_OPTIONS = { order: 2, precision: 2, period: null };
-
   /**
   * Determine the coefficient of determination (r^2) of a fit from the observations
   * and predictions.
@@ -65,36 +39,31 @@
   *
   * @return {number} - The r^2 value, or NaN if one cannot be calculated.
   */
+
   function determinationCoefficient(data, results) {
     var predictions = [];
     var observations = [];
-
     data.forEach(function (d, i) {
       if (d[1] !== null) {
         observations.push(d);
         predictions.push(results[i]);
       }
     });
-
     var sum = observations.reduce(function (a, observation) {
       return a + observation[1];
     }, 0);
     var mean = sum / observations.length;
-
     var ssyy = observations.reduce(function (a, observation) {
       var difference = observation[1] - mean;
       return a + difference * difference;
     }, 0);
-
     var sse = observations.reduce(function (accum, observation, index) {
       var prediction = predictions[index];
       var residual = observation[1] - prediction[1];
       return accum + residual * residual;
     }, 0);
-
     return 1 - sse / ssyy;
   }
-
   /**
   * Determine the solution of a system of linear equations A * x = b using
   * Gaussian elimination.
@@ -104,6 +73,8 @@
   *
   * @return {Array<number>} - Vector of normalized solution coefficients matrix (x)
   */
+
+
   function gaussianElimination(input, order) {
     var matrix = input;
     var n = input.length - 1;
@@ -111,6 +82,7 @@
 
     for (var i = 0; i < n; i++) {
       var maxrow = i;
+
       for (var j = i + 1; j < n; j++) {
         if (Math.abs(matrix[i][j]) > Math.abs(matrix[i][maxrow])) {
           maxrow = j;
@@ -132,6 +104,7 @@
 
     for (var _j2 = n - 1; _j2 >= 0; _j2--) {
       var total = 0;
+
       for (var _k2 = _j2 + 1; _k2 < n; _k2++) {
         total += matrix[_k2][_j2] * coefficients[_k2];
       }
@@ -141,7 +114,6 @@
 
     return coefficients;
   }
-
   /**
   * Round a number to a precision, specificed in number of decimal places
   *
@@ -152,16 +124,19 @@
   *
   * @return {numbr} - The number, rounded
   */
+
+
   function round(number, precision) {
     var factor = Math.pow(10, precision);
     return Math.round(number * factor) / factor;
   }
-
   /**
   * The set of all fitting methods
   *
   * @namespace
   */
+
+
   var methods = {
     linear: function linear(data, options) {
       var sum = [0, 0, 0, 0, 0];
@@ -190,13 +165,12 @@
       var points = data.map(function (point) {
         return predict(point[0]);
       });
-
       return {
         points: points,
         predict: predict,
         equation: [gradient, intercept],
         r2: round(determinationCoefficient(data, points), options.precision),
-        string: intercept === 0 ? 'y = ' + gradient + 'x' : 'y = ' + gradient + 'x + ' + intercept
+        string: intercept === 0 ? "y = ".concat(gradient, "x") : "y = ".concat(gradient, "x + ").concat(intercept)
       };
     },
     exponential: function exponential(data, options) {
@@ -218,6 +192,7 @@
       var b = (sum[1] * sum[4] - sum[5] * sum[3]) / denominator;
       var coeffA = round(a, options.precision);
       var coeffB = round(b, options.precision);
+
       var predict = function predict(x) {
         return [round(x, options.precision), round(coeffA * Math.exp(coeffB * x), options.precision)];
       };
@@ -225,12 +200,11 @@
       var points = data.map(function (point) {
         return predict(point[0]);
       });
-
       return {
         points: points,
         predict: predict,
         equation: [coeffA, coeffB],
-        string: 'y = ' + coeffA + 'e^(' + coeffB + 'x)',
+        string: "y = ".concat(coeffA, "e^(").concat(coeffB, "x)"),
         r2: round(determinationCoefficient(data, points), options.precision)
       };
     },
@@ -258,12 +232,11 @@
       var points = data.map(function (point) {
         return predict(point[0]);
       });
-
       return {
         points: points,
         predict: predict,
         equation: [coeffA, coeffB],
-        string: 'y = ' + coeffA + ' + ' + coeffB + ' ln(x)',
+        string: "y = ".concat(coeffA, " + ").concat(coeffB, " ln(x)"),
         r2: round(determinationCoefficient(data, points), options.precision)
       };
     },
@@ -292,12 +265,11 @@
       var points = data.map(function (point) {
         return predict(point[0]);
       });
-
       return {
         points: points,
         predict: predict,
         equation: [coeffA, coeffB],
-        string: 'y = ' + coeffA + 'x^' + coeffB,
+        string: "y = ".concat(coeffA, "x^").concat(coeffB),
         r2: round(determinationCoefficient(data, points), options.precision)
       };
     },
@@ -318,21 +290,23 @@
 
         lhs.push(a);
         a = 0;
-
         var c = [];
+
         for (var j = 0; j < k; j++) {
           for (var _l = 0; _l < len; _l++) {
             if (data[_l][1] !== null) {
               b += Math.pow(data[_l][0], i + j);
             }
           }
+
           c.push(b);
           b = 0;
         }
+
         rhs.push(c);
       }
-      rhs.push(lhs);
 
+      rhs.push(lhs);
       var coefficients = gaussianElimination(rhs, k).map(function (v) {
         return round(v, options.precision);
       });
@@ -346,13 +320,13 @@
       var points = data.map(function (point) {
         return predict(point[0]);
       });
-
       var string = 'y = ';
+
       for (var _i = coefficients.length - 1; _i >= 0; _i--) {
         if (_i > 1) {
-          string += coefficients[_i] + 'x^' + _i + ' + ';
+          string += "".concat(coefficients[_i], "x^").concat(_i, " + ");
         } else if (_i === 1) {
-          string += coefficients[_i] + 'x + ';
+          string += "".concat(coefficients[_i], "x + ");
         } else {
           string += coefficients[_i];
         }
@@ -362,7 +336,7 @@
         string: string,
         points: points,
         predict: predict,
-        equation: [].concat(_toConsumableArray(coefficients)).reverse(),
+        equation: _toConsumableArray(coefficients).reverse(),
         r2: round(determinationCoefficient(data, points), options.precision)
       };
     }
@@ -370,10 +344,10 @@
 
   function createWrapper() {
     var reduce = function reduce(accumulator, name) {
-      return _extends({
+      return _objectSpread({
         _round: round
       }, accumulator, _defineProperty({}, name, function (data, supplied) {
-        return methods[name](data, _extends({}, DEFAULT_OPTIONS, supplied));
+        return methods[name](data, _objectSpread({}, DEFAULT_OPTIONS, supplied));
       }));
     };
 
